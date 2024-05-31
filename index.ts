@@ -26,8 +26,8 @@ server.app.use('/producto',productoRoutes)
 //Conectar DB
 //mongoose.connect('mongodb://localhost:27017/fotosgram')
 //mongoose.connect('mongodb://localhost:27017/zap')
-mongoose.connect('mongodb://localhost:27017/puntoVenta')
-//mongoose.connect('mongodb://localhost:27017/Bicicletas')
+//mongoose.connect('mongodb://localhost:27017/puntoVenta')
+mongoose.connect('mongodb://localhost:27017/Bicicletas')
 
 //Levantar express
 server.start(() => {
