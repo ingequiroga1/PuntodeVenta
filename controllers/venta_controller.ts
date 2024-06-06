@@ -77,6 +77,37 @@ exports.modificar_cliente = (req: Request, res: Response) => {
     
     }
 
+exports.venta_descuento_post = async (req: Request, res: Response) => {
+    var id = req.params.id;
+    var descuento = req.body.descuento; 
+    let resultadoDescuento = {
+        exitoso: false,
+        resultado: {}
+    }
+    try{
+      const resultfind = await Venta.findById(id).exec();
+      if (!resultfind) {
+        const error = new Error('Producto no encontrado');
+        resultadoDescuento.resultado = error
+        return res.json(resultadoDescuento);
+      }
+
+      let nuevoTotal = resultfind.subtotal - descuento;
+      console.log("nuevototal",nuevoTotal);
+      
+      const resultDescuento = await Venta.updateOne({_id: id},{ $set: {descuento: descuento, total: nuevoTotal}}).exec();
+      console.log(resultDescuento);
+            
+   
+      resultadoDescuento.exitoso = true;
+      resultadoDescuento.resultado = {msg: "Se aplico el descuento"}
+      res.json(resultadoDescuento);
+   
+    }catch(error){
+         res.json(resultadoDescuento);
+    }
+}
+
 exports.venta_delete = async (req: Request, res: Response, next: any) => {  
     try {
         const result = await Venta.findByIdAndDelete(req.body.idventa).exec();
@@ -91,9 +122,11 @@ exports.venta_delete = async (req: Request, res: Response, next: any) => {
 exports.venta_add_productos = [
     body('cantidad', 'Cantidad requerida').isNumeric(),
     body('prodescripcion', 'Producto requerido').isLength({min:1}).trim().escape(),
+    body('precio','Precio requerido').isNumeric(),
     async(req: Request, res: Response)=>{
     var id = req.params.id;
-    const errors = validationResult(req);    
+    const errors = validationResult(req);   
+     
      Venta.findById(id)
              .populate('productos.producto')
              .exec().then(
@@ -113,12 +146,11 @@ exports.venta_add_productos = [
                                      var err = [{msg:'Producto No existe'}];
                                      res.json({ title: 'Detalle', venta: venta, producto: tprodes, errors: err, prodes:tmpDescripcion } );
                                  }else{
-                                    console.log(pro);
                                     
                                      var producto = {
                                          producto: pro._id,
                                          cantidad: Math.round(req.body.cantidad),
-                                         importe: Math.round(req.body.cantidad * pro.precio*100)/100, 
+                                         importe: Math.round(req.body.cantidad * req.body.precio*100)/100, 
                                          medias: Math.round(req.body.cantidad / 6),
                                          descripcion: pro.descripcion
                                      };
@@ -227,10 +259,7 @@ exports.venta_reportes_productos = async (req: Request, res: Response) => {
             let start = new Date(req.params.inicio)
             let end = new Date(req.params.fin)
             end.setDate(end.getDate() + 2);
-            console.log(start);
-            console.log(end);
             
-
             const result = await Venta.aggregate([
                 {
                   $match: {

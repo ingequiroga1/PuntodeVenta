@@ -17,6 +17,9 @@ ventaRoutes.post('/:id/agregar_producto', venta_controller.venta_add_productos)
 ventaRoutes.post('/:id/:idproducto/eliminar', venta_controller.venta_eliminar_producto )
 //Generar reporte
 ventaRoutes.get('/productos/reporte/:inicio/:fin', venta_controller.venta_reportes_productos )
+//Agregar Descuento
+ventaRoutes.post('/:id/descuento', venta_controller.venta_descuento_post )
+
 
 
 
